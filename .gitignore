@@ -1,0 +1,24 @@
+# Qt 项目自动生成的文件
+build-*/
+build/
+*.user
+*.user.*
+*.autosave
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+
+# 编译产物
+debug/
+release/
+*.exe
+*.dll
+*.so
+*.dylib
+*.o
+*.obj
+
+# 其他临时文件
+*.log
+*.bak
+*.tmp
