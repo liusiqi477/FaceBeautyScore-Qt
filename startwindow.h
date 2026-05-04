@@ -2,6 +2,7 @@
 #define STARTWINDOW_H
 
 #include <QMainWindow>
+#include "videotest.h"
 
 // 【关键】前向声明 PhotoTest，避免循环依赖
 class PhotoTest;
@@ -21,9 +22,14 @@ public:
 private slots:
     void on_photoTestBtn_clicked();
 
+
+
+    void on_videoTestBtn_clicked();
+
 private:
     Ui::StartWindow *ui;
     PhotoTest *photoTest;  // 只声明，不实例化
+    VideoTest *videoTest;
 };
 
 #endif // STARTWINDOW_H

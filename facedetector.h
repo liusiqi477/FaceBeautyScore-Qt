@@ -23,9 +23,14 @@ public:
 
     cv::Mat getAlignedFace() const; // 【新增】获取对齐后的人脸
     std::vector<cv::Point> getAlignedLandmarks() const; // 【新增】获取对齐后的68点
+    int getFaceCount() const;  // 新增：获取人脸数量
+    QImage detect68Points_Mat(cv::Mat img);//一个支持 Mat 帧输入的函数
 private:
     // 【新增】人脸对齐核心函数
-    void alignFace(const cv::Mat &inputImg);
+    bool alignFace(const cv::Mat &inputImg);
+    // 新增：取最大人脸（多张脸时用）
+    dlib::rectangle getLargestFace(const std::vector<dlib::rectangle>& faces);
+
     dlib::frontal_face_detector detector;
     dlib::shape_predictor sp;
     // ✅【关键】用vector保存68个点坐标
@@ -34,6 +39,7 @@ private:
     // 【新增】对齐后的数据
     cv::Mat m_alignedFace;
     std::vector<cv::Point> m_alignedLandmarks;
+    int m_faceCount = 0; // 人脸数量
 };
 
 #endif // FACEDETECTOR_H

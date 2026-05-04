@@ -5,7 +5,7 @@
 #include "facedetector.h"
 #include "beautyscorer.h"
 #include "scoredisplay.h"
-
+#include "facialfeatureanalyzer.h"
 // 【关键】前向声明 StartWindow，避免循环依赖
 class StartWindow;
 
@@ -34,6 +34,7 @@ private:
     StartWindow *m_startWindow;  // 指针成员
     BeautyScorer m_beauty;  // 评分对象
     ScoreDisplay *m_scoreDisplay;  // 分数显示
+    FacialFeatureAnalyzer featureAnalyzer;   // 新增成员
 };
 
 #endif // PHOTOTEST_H

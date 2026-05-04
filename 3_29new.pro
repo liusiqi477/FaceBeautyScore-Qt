@@ -9,21 +9,26 @@ CONFIG += c++17
 SOURCES += \
     beautyscorer.cpp \
     facedetector.cpp \
+    facialfeatureanalyzer.cpp \
     main.cpp \
     phototest.cpp \
     scoredisplay.cpp \
-    startwindow.cpp
+    startwindow.cpp \
+    videotest.cpp
 
 HEADERS += \
     beautyscorer.h \
     facedetector.h \
+    facialfeatureanalyzer.h \
     phototest.h \
     scoredisplay.h \
-    startwindow.h
+    startwindow.h \
+    videotest.h
 
 FORMS += \
     phototest.ui \
-    startwindow.ui
+    startwindow.ui \
+    videotest.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -103,29 +103,45 @@ void PhotoTest::on_detectBtn_clicked()
         QMessageBox::warning(this, "提示", "请先选择图片！");
         return;
     }
-    ui->detectBtn->setVisible(false);
 
     QImage result = detector.detect68Points(currentImagePath);
-    if (result.isNull()) return;
+    if (result.isNull()) {
+        QMessageBox::warning(this, "提示", "未检测到人脸，请更换图片！");
+        m_scoreDisplay->clear();
+        return;
+    }
 
-    // 显示带68点的原图
     ui->label->setPixmap(QPixmap::fromImage(result).scaled(ui->label->size(), Qt::KeepAspectRatio));
-    // 评分
+
+    // 人脸数量判断
+    int faceCnt = detector.getFaceCount();
+    if(faceCnt > 1){
+        QMessageBox::information(this, "提示", "检测到多张人脸，已自动选取最大人脸评分");
+    }
+
+    // 取对齐后的关键点评分（保证比例准确）
     auto points = detector.getAlignedLandmarks();
     auto face = detector.getAlignedFace();
+
+    // 空值防护
+    if(points.size() < 68 || face.empty()){
+        QMessageBox::warning(this, "错误", "人脸数据异常，无法评分");
+        return;
+    }
+
     double total = m_beauty.calculateTotalScore(points, face);
 
-    // ============ 显示到界面 ============
+    // 显示分数
     m_scoreDisplay->updateScore(
         m_beauty.sanTingScore(),
         m_beauty.wuYanScore(),
         m_beauty.symmetryScore(),
         m_beauty.skinScore(),
-        m_beauty.featureScore(),
+        m_beauty.featureProportionsScore(),
         total
         );
+    // ===== 五官分析 =====
+    FacialFeatureAnalyzer analyzer;
+    FacialFeatures feat = analyzer.analyze(points);   // ✅ 使用已有的 points（即对齐后的68点）
+    m_scoreDisplay->setFacialFeatures(feat);
 }
-
-
-
-
