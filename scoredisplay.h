@@ -25,6 +25,12 @@ public:
     void setFacialFeatures(const FacialFeatures &f);
 
     void clear();
+    // 【新增】设置第 index 项是否已锁定（0:三庭,1:五眼,2:对称,3:皮肤,4:协调）
+    void setItemLocked(int index, bool locked);
+
+    // 【新增】重置所有锁定标识（用于 reset 时）
+    void resetLockedFlags();
+
 
 private:
     void setupFeatureCard();   // 创建卡片布局
@@ -47,6 +53,10 @@ private:
     QLabel *labLipWidth;          // 嘴唇宽度
     QLabel *labBrowThick;         // 眉毛粗细
     QLabel *labBrowDist;          // 眉眼距离
+
+    // 【新增】保存解锁前的文本（无锁版本），用于恢复
+    QString lockedTexts[5];
+    bool    lockedFlags[5] = {false};
 };
 
 #endif

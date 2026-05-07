@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1006</width>
-    <height>735</height>
+    <width>1000</width>
+    <height>730</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,30 +36,17 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="openCameraBtn">
+  <widget class="QLabel" name="hintLabel">
    <property name="geometry">
     <rect>
-     <x>220</x>
-     <y>660</y>
-     <width>108</width>
-     <height>31</height>
+     <x>20</x>
+     <y>480</y>
+     <width>501</width>
+     <height>131</height>
     </rect>
    </property>
    <property name="text">
-    <string>打开摄像头</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="backBtn">
-   <property name="geometry">
-    <rect>
-     <x>690</x>
-     <y>660</y>
-     <width>108</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>返回</string>
+    <string/>
    </property>
   </widget>
  </widget>

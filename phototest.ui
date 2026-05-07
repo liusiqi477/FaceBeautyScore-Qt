@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>762</width>
-    <height>801</height>
+    <width>1000</width>
+    <height>730</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QPushButton" name="selectBtn">
    <property name="geometry">
     <rect>
-     <x>160</x>
-     <y>720</y>
+     <x>90</x>
+     <y>660</y>
      <width>108</width>
      <height>31</height>
     </rect>
@@ -29,8 +29,8 @@
   <widget class="QPushButton" name="backBtn">
    <property name="geometry">
     <rect>
-     <x>530</x>
-     <y>720</y>
+     <x>460</x>
+     <y>660</y>
      <width>108</width>
      <height>31</height>
     </rect>
@@ -42,8 +42,8 @@
   <widget class="QPushButton" name="detectBtn">
    <property name="geometry">
     <rect>
-     <x>590</x>
-     <y>40</y>
+     <x>280</x>
+     <y>660</y>
      <width>108</width>
      <height>31</height>
     </rect>
@@ -55,10 +55,10 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>70</x>
-     <y>50</y>
-     <width>421</width>
-     <height>611</height>
+     <x>0</x>
+     <y>10</y>
+     <width>661</width>
+     <height>481</height>
     </rect>
    </property>
    <property name="text">
@@ -68,9 +68,9 @@
   <widget class="QWidget" name="widget_score" native="true">
    <property name="geometry">
     <rect>
-     <x>540</x>
-     <y>90</y>
-     <width>211</width>
+     <x>700</x>
+     <y>10</y>
+     <width>271</width>
      <height>601</height>
     </rect>
    </property>

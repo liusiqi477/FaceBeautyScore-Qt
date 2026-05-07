@@ -1,5 +1,5 @@
 QT += widgets
-
+QT += network
 CONFIG += c++17
 
 # You can make your code fail to compile if it uses deprecated APIs.
@@ -92,13 +92,7 @@ DEFINES += DLIB_STATIC_LINKING_ONLY
 CONFIG += c++17
 
 
-# # 假设 vcpkg 安装在 D:\download\vcpkg
-# INCLUDEPATH += D:/download/vcpkg/installed/x64-windows/include
-# LIBS += -LD:/download/vcpkg/installed/x64-windows/lib -ldlib
 
-
-# # # 链接 vcpkg 提供的 BLAS/LAPACK 依赖
-# LIBS += -lopenblas
 
 
 # ==========================

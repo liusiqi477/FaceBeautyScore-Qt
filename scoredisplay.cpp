@@ -92,8 +92,58 @@ ScoreDisplay::ScoreDisplay(QWidget *parent) : QWidget(parent)
 
     setLayout(mainLayout);
     clear();
+
+    resetLockedFlags();
+}
+void ScoreDisplay::resetLockedFlags()
+{
+    for (int i = 0; i < 5; ++i) {
+        lockedFlags[i] = false;
+        lockedTexts[i].clear();
+    }
 }
 
+
+void ScoreDisplay::setItemLocked(int index, bool locked)
+{
+    if (index < 0 || index > 4) return;
+    lockedFlags[index] = locked;
+
+    QLabel* lab = nullptr;
+    QString icon, name;
+    switch (index) {
+    case 0: lab = lab_san; icon = "🔺"; name = "三庭"; break;
+    case 1: lab = lab_wu;  icon = "👁️"; name = "五眼"; break;
+    case 2: lab = lab_sym; icon = "🔄"; name = "对称"; break;
+    case 3: lab = lab_skin;icon = "✨"; name = "皮肤"; break;
+    case 4: lab = lab_feat;icon = "🎭"; name = "协调"; break;
+    }
+    if (!lab) return;
+
+    if (locked) {
+        // 保存当前无锁文本
+        lockedTexts[index] = lab->text();
+        // 从文本中提取分数值
+        QString txt = lockedTexts[index];
+        double val = 0.0;
+        int slashPos = txt.indexOf('/');
+        if (slashPos > 0) {
+            int start = txt.lastIndexOf(' ', slashPos - 1);
+            if (start >= 0) {
+                val = txt.mid(start + 1, slashPos - start - 1).toDouble();
+            }
+        }
+        // 设置锁定时文本：原有内容 + 🔒
+        lab->setText(QString("🔒 %1 %2  %3/20  ")
+                         .arg(icon, name, QString::number(val, 'f', 1)));
+        // 不修改颜色样式，保持 updateScore 设置的样式
+    } else {
+        // 解锁：恢复无锁文本
+        if (!lockedTexts[index].isEmpty())
+            lab->setText(lockedTexts[index]);
+        // 同样不改变样式
+    }
+}
 void ScoreDisplay::setupFeatureCard()
 {
     featureCard = new QFrame;
@@ -111,23 +161,23 @@ void ScoreDisplay::setupFeatureCard()
     featureCard->setGraphicsEffect(cardShadow);
 
     auto *cardLayout = new QVBoxLayout(featureCard);
-    cardLayout->setSpacing(10);
+    cardLayout->setSpacing(15);
     cardLayout->setContentsMargins(16, 16, 16, 16);
 
     // 标题
     auto *title = new QLabel("🧩 五官特征");
-    title->setStyleSheet("font-size:15px; font-weight:bold; color:#c3bef7; background:transparent;");
+    title->setStyleSheet("font-size:20px; font-weight:bold; color:#c3bef7; background:transparent;");
     cardLayout->addWidget(title);
 
     // 通用标签样式
-    QString lblStyle = "font-size:13px; color:#d0d0e0; background:rgba(255,255,255,0.06); "
+    QString lblStyle = "font-size:13px; font-weight:bold;color:#d0d0e0; background:rgba(255,255,255,0.06); "
                        "border-radius:8px; padding:4px 10px;";
 
     // 创建一行两个标签的辅助函数
     auto addRow = [&](QLabel *&left, QLabel *&right,
                       const QString &leftText, const QString &rightText) {
         auto *row = new QHBoxLayout;
-        row->setSpacing(12);          // 两个指标之间的间距
+        row->setSpacing(14);          // 两个指标之间的间距
         left  = new QLabel(leftText);
         right = new QLabel(rightText);
         left->setStyleSheet(lblStyle);
@@ -191,27 +241,51 @@ QString ScoreDisplay::formatFeature(const QString &value, const QString &categor
 void ScoreDisplay::updateScore(double sanTing, double wuYan, double symmetry,
                                double skin, double feature, double total)
 {
-    lab_total->setText(QString::number(total, 'f', 1));
+    if (total < 0.0) {
+        // 未得出总分：不显示任何数字，可保留背景但文字为空
+        lab_total->setText("--");
+        lab_comment->setText("评语：--");
+        lab_comment->setStyleSheet("font-size:16px; color:#aaaaaa;");
+    } else {
+        lab_total->setText(QString::number(total, 'f', 1));
+        QString comment = getComment(total);
+        QString commentColor;
+        if (total >= 85)      commentColor = "#ff4d6d";
+        else if (total >= 70) commentColor = "#43e97b";
+        else if (total >= 55) commentColor = "#f9ca24";
+        else if (total >= 40) commentColor = "#f0932b";
+        else                  commentColor = "#badc58";
 
-    QString comment = getComment(total);
-    QString commentColor;
-    if (total >= 85)      commentColor = "#ff4d6d";
-    else if (total >= 70) commentColor = "#43e97b";
-    else if (total >= 55) commentColor = "#f9ca24";
-    else if (total >= 40) commentColor = "#f0932b";
-    else                  commentColor = "#badc58";
+        lab_comment->setText("评语：" + comment);
+        lab_comment->setStyleSheet(QString("font-size:16px; font-weight:bold; color:%1; padding:4px;").arg(commentColor));
+    }
 
-    lab_comment->setText("评语：" + comment);
-    lab_comment->setStyleSheet(QString("font-size:16px; font-weight:bold; color:%1; padding:4px;").arg(commentColor));
 
-    auto updateLabel = [](QLabel *lab, const QString &icon, const QString &name, double val) {
-        lab->setText(QString("%1 %2  %3/20").arg(icon, name, QString::number(val, 'f', 1)));
-    };
-    updateLabel(lab_san, "🔺", "三庭", sanTing);
-    updateLabel(lab_wu, "👁️", "五眼", wuYan);
-    updateLabel(lab_sym, "🔄", "对称", symmetry);
-    updateLabel(lab_skin, "✨", "皮肤", skin);
-    updateLabel(lab_feat, "🎭", "协调", feature);
+    // auto updateLabel = [](QLabel *lab, const QString &icon, const QString &name, double val) {
+    //     lab->setText(QString("%1 %2  %3/20").arg(icon, name, QString::number(val, 'f', 1)));
+    // };
+    // updateLabel(lab_san, "🔺", "三庭", sanTing);
+    // updateLabel(lab_wu, "👁️", "五眼", wuYan);
+    // updateLabel(lab_sym, "🔄", "对称", symmetry);
+    // updateLabel(lab_skin, "✨", "皮肤", skin);
+    // updateLabel(lab_feat, "🎭", "协调", feature);
+    // 分项数据数组
+    QLabel* labs[5] = {lab_san, lab_wu, lab_sym, lab_skin, lab_feat};
+    QString icons[5] = {"🔺", "👁️", "🔄", "✨", "🎭"};
+    QString names[5] = {"三庭", "五眼", "对称", "皮肤", "协调"};
+    double values[5] = {sanTing, wuYan, symmetry, skin, feature};
+    QProgressBar* bars[5] = {bar_san, bar_wu, bar_sym, bar_skin, bar_feat};
+
+    for (int i = 0; i < 5; ++i) {
+        if (!lockedFlags[i]) {
+            // 未锁定：正常更新标签和进度条
+            labs[i]->setText(QString("%1 %2  %3/20")
+                                 .arg(icons[i], names[i], QString::number(values[i], 'f', 1)));
+            bars[i]->setValue(static_cast<int>(values[i] + 0.5));
+            applyProgressStyle(bars[i], values[i]);
+        }
+        // 已锁定的分项：什么都不更新，保留之前 setItemLocked 设置的 🔒 标记
+    }
 
     auto setBar = [&](QProgressBar *bar, double val) {
         bar->setValue(static_cast<int>(val + 0.5));
@@ -304,4 +378,5 @@ void ScoreDisplay::clear()
     labLipWidth ->setText("唇宽: --");
     labBrowThick->setText("眉粗: --");
     labBrowDist ->setText("眉眼距: --");
+    resetLockedFlags();
 }

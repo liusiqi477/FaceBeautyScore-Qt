@@ -21,6 +21,29 @@ double BeautyScorer::calculateTotalScore(const std::vector<cv::Point>& landmarks
     m_symmetry   = calcSymmetry(landmarks);
     m_skin = calcSkin(alignedFace, landmarks);
     m_featureProportions    = calcFeatureProportions(landmarks);
+    return m_sanTing + m_wuYan + m_symmetry + m_skin + m_featureProportions;
+}
+
+double BeautyScorer::calculateTotalScore(const std::vector<cv::Point>& alignedLandmarks,
+                                         const cv::Mat& alignedFace,
+                                         const std::vector<cv::Point>& originalLandmarks,
+                                         const cv::Mat& originalFrame)
+{
+    // 提前退出：只要对齐数据不足就返回0（和原来一致）
+    if (alignedLandmarks.size() < 68 || alignedFace.empty())
+        return 0;
+
+    // 五官、三庭、对称、特征比：继续用对齐后的点（已在标准正脸上）
+    m_sanTing    = calcSanTing(alignedLandmarks);
+    m_wuYan      = calcWuYan(alignedLandmarks);
+    m_symmetry   = calcSymmetry(alignedLandmarks);
+    m_featureProportions = calcFeatureProportions(alignedLandmarks);
+
+    // 【核心改动】皮肤纹理：用原始大图 + 原始关键点
+    if (originalLandmarks.size() == 68 && !originalFrame.empty())
+        m_skin = calcSkin(originalFrame, originalLandmarks);
+    else
+        m_skin = calcSkin(alignedFace, alignedLandmarks);  // 极少数情况下的备用
 
     return m_sanTing + m_wuYan + m_symmetry + m_skin + m_featureProportions;
 }

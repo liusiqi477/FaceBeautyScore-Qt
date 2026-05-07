@@ -22,3 +22,4 @@ release/
 *.log
 *.bak
 *.tmp
+.env
