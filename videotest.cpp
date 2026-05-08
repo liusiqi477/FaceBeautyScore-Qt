@@ -1,5 +1,5 @@
 #include "videotest.h"
-#include "ui_videotest.h"   // 仍然保留，但我们自己重建界面
+#include "ui_videotest.h"
 #include <QMessageBox>
 #include <QGraphicsDropShadowEffect>
 #include <QHBoxLayout>
@@ -10,11 +10,11 @@ VideoTest::VideoTest(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::VideoTest)
 {
-    ui->setupUi(this);                     // 保留原有 UI，但会被我们覆盖
+    ui->setupUi(this);
     setWindowTitle("✨ 实时颜值测评");
     setFixedSize(1100, 650);
 
-    // 1. 全局背景样式（可改为你喜欢的其他渐变）
+    // 全局背景样式
     setStyleSheet(R"(
         QMainWindow {
             background: qlineargradient(
@@ -24,13 +24,11 @@ VideoTest::VideoTest(QWidget *parent)
         }
     )");
 
-    // 2. 重新布局整个界面
+    // 重新布局整个界面
     setupUI();
 
-    // 3. 添加动态光斑
-    addGlowEffects();
 
-    // 4. 创建定时器和评分面板（注意：scoreDisplay 需要在 setupUI 之前？我们在 setupUI 里创建）
+    //  创建定时器和评分面板
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &VideoTest::updateFrame);
 
@@ -43,7 +41,7 @@ VideoTest::~VideoTest()
     delete ui;
 }
 
-// ========== 界面搭建（完全用代码） ==========
+// 界面搭建
 void VideoTest::setupUI()
 {
     QWidget *central = new QWidget(this);
@@ -52,7 +50,7 @@ void VideoTest::setupUI()
     mainLayout->setContentsMargins(25, 25, 25, 25);
     mainLayout->setSpacing(25);
 
-    // ---------- 左侧：视频框 + 按钮 + 提示 ----------
+    // 左侧：视频框 + 按钮 + 提示
     QVBoxLayout *leftLayout = new QVBoxLayout;
     leftLayout->setSpacing(15);
 
@@ -124,11 +122,11 @@ void VideoTest::setupUI()
 
     btnBack->setGraphicsEffect(s1);
 
-
-    btnRow->addStretch();       // 👈 左边弹簧
+    //按钮位置
+    btnRow->addStretch();
     btnRow->addWidget(btnCamera);
     btnRow->addWidget(btnBack);
-    btnRow->addStretch();       // 👈 右边弹簧
+    btnRow->addStretch();
     leftLayout->addLayout(btnRow);
 
     // 提示标签
@@ -141,7 +139,7 @@ void VideoTest::setupUI()
 
     mainLayout->addLayout(leftLayout);
 
-    // ---------- 右侧：评分面板 ----------
+    // 右侧：评分面板
     QVBoxLayout *rightLayout = new QVBoxLayout;
     scoreDisplay = new ScoreDisplay;
     scoreDisplay->setFixedWidth(360);
@@ -149,49 +147,12 @@ void VideoTest::setupUI()
     rightLayout->addStretch();
     mainLayout->addLayout(rightLayout);
 
-    // 信号连接（替换原来 ui 中的按钮槽函数）
+    // 信号连接
     connect(btnCamera, &QPushButton::clicked, this, &VideoTest::on_openCameraBtn_clicked);
     connect(btnBack,   &QPushButton::clicked, this, &VideoTest::on_backBtn_clicked);
 }
 
-// ========== 动态光斑 ==========
-void VideoTest::addGlowEffects()
-{
-    auto createGlow = [&](int x, int y, QString color) {
-        QLabel *glow = new QLabel(this);
-        glow->setFixedSize(200, 200);
-        glow->setStyleSheet(QString("background: radialgradient(cx:0.5, cy:0.5, radius:0.5, "
-                                    "stop:0 %1, stop:1 transparent); border: none;").arg(color));
-        glow->setAttribute(Qt::WA_TransparentForMouseEvents);
-        glow->move(x, y);
-        glow->lower();
-        return glow;
-    };
 
-    QLabel *g1 = createGlow(60, 40,  "rgba(160,140,255,25%)");
-    QLabel *g2 = createGlow(820, 80, "rgba(255,120,180,20%)");
-    QLabel *g3 = createGlow(180, 520, "rgba(80,200,255,18%)");
-    QLabel *g4 = createGlow(780, 480, "rgba(255,200,100,15%)");
-
-    glowTimer = new QTimer(this);
-    glowTimer->setInterval(50);
-    float t = 0;
-    connect(glowTimer, &QTimer::timeout, this, [=]() mutable {
-        t += 0.02f;
-        if (t > 2 * M_PI) t -= 2 * M_PI;
-        g1->move(60  + 20 * qSin(t * 1.3f),  40  + 15 * qCos(t * 1.7f));
-        g2->move(820 + 25 * qSin(t * 0.8f + 1), 80  + 20 * qCos(t * 1.2f + 2));
-        g3->move(180 + 18 * qSin(t * 1.1f + 3), 520 + 22 * qCos(t * 0.9f + 1));
-        g4->move(780 + 22 * qSin(t * 0.6f + 2), 480 + 18 * qCos(t * 1.5f + 0.5f));
-    });
-    glowTimer->start();
-}
-
-// ========== 以下所有业务逻辑函数保持不动 ==========
-// (on_openCameraBtn_clicked, updateFrame, generateHint, stopCamera, on_backBtn_clicked, resetEvaluation 等)
-// 注意：里面原来引用的 ui->label 改为 videoFrame；ui->openCameraBtn 改为 btnCamera；
-// ui->hintLabel 改为 hintLabel；ui->backBtn 改为 btnBack
-// 另外，如果需要引用 ui->widget_score 可以不再需要，因为 scoreDisplay 直接创建
 
 void VideoTest::on_openCameraBtn_clicked()
 {
@@ -206,7 +167,7 @@ void VideoTest::on_openCameraBtn_clicked()
         return;
     }
 
-    timer->start(40);
+    timer->start(25);
     btnCamera->setText("⏹ 停止测评");
 }
 
@@ -219,8 +180,10 @@ void VideoTest::updateFrame()
     cv::Mat process = frame.clone();
 
     try {
-        detector.detect68Points_Mat(process);
+        // 使用 detect 接口
+        bool detected = detector.detect(process);
 
+        // 画68点
         auto points = detector.getLandmarks();
         for (auto& p : points)
             cv::circle(frame, p, 2, cv::Scalar(0, 255, 0), -1);
@@ -228,7 +191,8 @@ void VideoTest::updateFrame()
         auto alignedPts = detector.getAlignedLandmarks();
         auto alignedFace = detector.getAlignedFace();
 
-        if (evalState == EvalState::Evaluating && alignedPts.size() == 68 && !alignedFace.empty()) {
+        // 只有在检测成功且对齐数据有效时才进行评分
+        if (detected && evalState == EvalState::Evaluating && alignedPts.size() == 68 && !alignedFace.empty()) {
             double total = scorer.calculateTotalScore(alignedPts, alignedFace,
                                                       detector.getLandmarks(), frame);
             double sanTing     = scorer.sanTingScore();
@@ -300,6 +264,7 @@ void VideoTest::updateFrame()
                 hintLabel->hide();
             }
         } else if (evalState == EvalState::Evaluating) {
+            // 没有检测到人脸或数据无效则重置未锁定项的稳定计数
             if (!lockSanTing)    { stableSanTing = 0; lastSanTing = 0.0; }
             if (!lockWuYan)      { stableWuYan = 0; lastWuYan = 0.0; }
             if (!lockSymmetry)   { stableSymmetry = 0; lastSymmetry = 0.0; }
@@ -307,6 +272,7 @@ void VideoTest::updateFrame()
             if (!lockProportions){ stableProportions = 0; lastProportions = 0.0; }
         }
     } catch (...) {
+        // 异常安全：重置未锁定项
         if (evalState == EvalState::Evaluating) {
             if (!lockSanTing)    stableSanTing = 0;
             if (!lockWuYan)      stableWuYan = 0;
@@ -367,7 +333,3 @@ void VideoTest::resetEvaluation()
     hintLabel->hide();
     btnCamera->setText("🎥 打开摄像头");
 }
-
-// 如果你的头文件声明了 lockItem，保留空实现即可
-void VideoTest::lockItem(double &lockedVal, bool &lockFlag, int &stableCount,
-                         double &lastCandidate, double currentVal, double threshold) {}

@@ -54,7 +54,7 @@ private:
     QLabel *labBrowThick;         // 眉毛粗细
     QLabel *labBrowDist;          // 眉眼距离
 
-    // 【新增】保存解锁前的文本（无锁版本），用于恢复
+    //保存解锁前的文本，用于恢复
     QString lockedTexts[5];
     bool    lockedFlags[5] = {false};
 };

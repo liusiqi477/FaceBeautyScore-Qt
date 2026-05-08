@@ -3,59 +3,59 @@
 
 FacialFeatureAnalyzer::FacialFeatureAnalyzer() {}
 
-// ========== 主分析函数 ==========
+
 FacialFeatures FacialFeatureAnalyzer::analyze(const std::vector<cv::Point>& lm) const {
     if (lm.size() < 68) return FacialFeatures();
 
     FacialFeatures f;
 
-    // 1. 眼睛形状 (眼裂高宽比)
+    // 眼睛形状 (眼裂高宽比)
     double leftEyeAR  = eyeAspectRatio(lm, true);
     double rightEyeAR = eyeAspectRatio(lm, false);
     double avgEyeAR   = (leftEyeAR + rightEyeAR) / 2.0;
     f.eyeShape = classifyEyeShape(avgEyeAR);
 
-    // 2. 眼距 (内眼角间距 / 脸宽)
+    //  眼距 (内眼角间距 / 脸宽)
     double inter = intercanthalWidth(lm);
     double fw = faceWidth(lm);
     double eyeDistRatio = inter / fw;
     f.eyeDistance = classifyEyeDistance(eyeDistRatio);
 
-    // 3. 眼睛大小 (眼裂高度 / 脸高) 简化用脸宽
+    // 眼睛大小 (眼裂高度 / 脸高) 简化用脸宽
     double eyeH = (eyeOpenHeight(lm, true) + eyeOpenHeight(lm, false)) / 2.0;
     double eyeSizeRatio = eyeH / fw;
     f.eyeSize = classifyEyeSize(eyeSizeRatio);
 
-    // 4. 鼻翼宽度
+    // 鼻翼宽度
     double noseW = noseWingWidth(lm);
     double noseRatio = noseW / fw;
     f.noseWing = classifyNoseWing(noseRatio);
 
-    // 5. 嘴唇厚薄 (唇高 / 唇宽)
+    // 嘴唇厚薄 (唇高 / 唇宽)
     double lpH = lipHeight(lm);
     double lpW = lipWidth(lm);
     double lipRatio = lpH / lpW;
     f.lipThickness = classifyLipThickness(lipRatio);
 
-    // 6. 嘴唇宽度 (唇宽 / 脸宽)
+    // 嘴唇宽度 (唇宽 / 脸宽)
     double lipWRatio = lpW / fw;
     f.lipWidth = classifyLipWidth(lipWRatio);
 
-    // 7. 眉毛粗细 (眉上下缘平均距离)
+    // 眉毛粗细 (眉上下缘平均距离)
     double leftBrowH = browHeight(lm, true);
     double rightBrowH = browHeight(lm, false);
     double avgBrowH = (leftBrowH + rightBrowH) / 2.0;
     double browThickRatio = avgBrowH / fw;
     f.browThickness = classifyBrowThickness(browThickRatio);
 
-    // 8. 眉眼距离 (眉下缘到眼上缘)
+    // 眉眼距离 (眉下缘到眼上缘)
     double leftBrowEye = browEyeDistance(lm, true);
     double rightBrowEye = browEyeDistance(lm, false);
     double avgBrowEye = (leftBrowEye + rightBrowEye) / 2.0;
     double browEyeRatio = avgBrowEye / fw;
     f.browDistance = classifyBrowDistance(browEyeRatio);
 
-    // 9. 生成综合总结
+    // 生成综合总结
     f.summary = QString("眼型%1，%2，眼睛%3；鼻翼%4；%5，%6；眉毛%7，%8。")
                     .arg(f.eyeShape, f.eyeDistance, f.eyeSize,
                          f.noseWing, f.lipThickness, f.lipWidth,
@@ -64,7 +64,7 @@ FacialFeatures FacialFeatureAnalyzer::analyze(const std::vector<cv::Point>& lm) 
     return f;
 }
 
-// ========== 测量函数 ==========
+// 测量函数
 double FacialFeatureAnalyzer::eyeAspectRatio(const std::vector<cv::Point>& lm, bool leftEye) const {
     int base = leftEye ? 36 : 42;
     double h1 = std::abs(lm[base+1].y - lm[base+5].y);
@@ -116,7 +116,7 @@ double FacialFeatureAnalyzer::browEyeDistance(const std::vector<cv::Point>& lm, 
     return std::abs(lm[eyeTopIdx].y - lm[browIdx].y);
 }
 
-// ========== 分类函数 (阈值可自行调优) ==========
+// 分类函数
 QString FacialFeatureAnalyzer::classifyEyeShape(double ratio) const {
     if (ratio < 0.22) return "细长";
     if (ratio > 0.32) return "圆大";

@@ -12,11 +12,11 @@ StartWindow::StartWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // ========== 窗口基础 ==========
+    // 窗口基础
     this->setWindowTitle("✨ 颜值评估系统");
     this->setFixedSize(500, 380);
 
-    // ========== 1. 深邃渐变背景 ==========
+    //渐变背景
     this->setStyleSheet(R"(
         QWidget#StartWindow {
             background: qlineargradient(
@@ -26,77 +26,101 @@ StartWindow::StartWindow(QWidget *parent)
         }
     )");
 
-    // ========== 2. 动态浮动光斑 ==========
+    // 动态浮动光斑，用 QPainter 径向渐变
+    auto makeGlowPixmap = [](const QColor &centerColor, int size) {
+        QPixmap pix(size, size);
+        pix.fill(Qt::transparent);
+        QPainter p(&pix);
+        p.setRenderHint(QPainter::Antialiasing);
+        QPointF center(size / 2.0, size / 2.0);
+       QRadialGradient g(center, size / 1.5);  // 中心亮斑
+        g.setColorAt(0, centerColor);
+        g.setColorAt(1, Qt::transparent);
+        p.setBrush(g);
+        p.setPen(Qt::NoPen);
+        p.drawEllipse(pix.rect());
+        p.end();
+        return pix;
+    };
+
     QLabel *glow1 = new QLabel(this);
     QLabel *glow2 = new QLabel(this);
     QLabel *glow3 = new QLabel(this);
     QLabel *glow4 = new QLabel(this);
 
-    auto styleGlow = [](QLabel *label, const QString &color) {
-        label->setFixedSize(180, 180);
-        label->setStyleSheet(QString("background: radialgradient(cx:0.5, cy:0.5, radius:0.5, "
-                                     "stop:0 %1, stop:1 transparent); border: none;").arg(color));
-        label->setAttribute(Qt::WA_TransparentForMouseEvents);
-        label->lower();
-    };
-    styleGlow(glow1, "rgba(160,120,255,30%)");
-    styleGlow(glow2, "rgba(255,100,160,25%)");
-    styleGlow(glow3, "rgba(80,180,255,20%)");
-    styleGlow(glow4, "rgba(255,180,80,20%)");
+    int glowSize = 200;
+    glow1->setFixedSize(glowSize, glowSize);
+    glow2->setFixedSize(glowSize, glowSize);
+    glow3->setFixedSize(glowSize, glowSize);
+    glow4->setFixedSize(glowSize, glowSize);
 
-    glow1->move(30, 30);
-    glow2->move(290, 160);
-    glow3->move(140, 240);
-    glow4->move(310, 20);
+    // 建议值
+    glow1->setPixmap(makeGlowPixmap(QColor(160, 120, 255, 150), glowSize));
+    glow2->setPixmap(makeGlowPixmap(QColor(255, 100, 160, 140), glowSize));
+    glow3->setPixmap(makeGlowPixmap(QColor(80, 180, 255, 130), glowSize));
+    glow4->setPixmap(makeGlowPixmap(QColor(255, 180, 80, 130), glowSize));
+    // 透明鼠标事件 + 置于底层
+    for (auto *g : { glow1, glow2, glow3, glow4 }) {
+        g->setAttribute(Qt::WA_TransparentForMouseEvents);
+        g->setStyleSheet("background: transparent;");   // ← 关键
+        g->setAttribute(Qt::WA_TranslucentBackground);  // ← 双保险
+        g->lower();
+    }
 
-    // 动画：各光斑沿不同正弦轨迹移动
+    glow1->move(10, 10);
+    glow2->move(300, 100);
+    glow3->move(100, 200);
+    glow4->move(350, 30);
+
+    // 动画：各光斑沿正弦轨迹移动
     QTimer *glowTimer = new QTimer(this);
     glowTimer->setInterval(50);
     float t = 0;
     connect(glowTimer, &QTimer::timeout, this, [=]() mutable {
         t += 0.02f;
         if (t > 2 * M_PI) t -= 2 * M_PI;
-        glow1->move(30  + 20 * qSin(t * 1.3f),  30  + 15 * qCos(t * 1.7f));
-        glow2->move(290 + 25 * qSin(t * 0.8f + 1), 160 + 20 * qCos(t * 1.2f + 2));
-        glow3->move(140 + 18 * qSin(t * 1.1f + 3), 240 + 22 * qCos(t * 0.9f + 1));
-        glow4->move(310 + 22 * qSin(t * 0.6f + 2), 20  + 18 * qCos(t * 1.5f + 0.5f));
+        // 动画里振幅
+        glow1->move(10  + 40 * qSin(t * 1.3f),        10  + 35 * qCos(t * 1.7f));
+        glow2->move(300 + 50 * qSin(t * 0.8f + 1),    100 + 45 * qCos(t * 1.2f + 2));
+        glow3->move(100 + 40 * qSin(t * 1.1f + 3),    200 + 45 * qCos(t * 0.9f + 1));
+        glow4->move(350 + 50 * qSin(t * 0.6f + 2),    30  + 40 * qCos(t * 1.5f + 0.5f));
     });
     glowTimer->start();
 
-    // ========== 3. 标题区（呼吸发光） ==========
-    QLabel *title = ui->label;
-    title->setText("✨ 颜值测评 ✨");
-    title->setAlignment(Qt::AlignCenter);
-    title->setGeometry(0, 30, 500, 60);
+    // 标题区
+    QLabel *titleLabel = new QLabel("✨ 颜值测评 ✨", this);
+    titleLabel->setAlignment(Qt::AlignCenter);
+    titleLabel->setGeometry(0, 30, 500, 60);
     QFont titleFont("Microsoft YaHei", 32, QFont::Bold);
     titleFont.setLetterSpacing(QFont::AbsoluteSpacing, 4);
-    title->setFont(titleFont);
-    title->setStyleSheet("color: #ffffff; background: transparent; border: none;");
-
+    titleLabel->setFont(titleFont);
+    titleLabel->setStyleSheet("color: #ffffff; background: transparent; border: none;");
+    titleLabel->raise();
     auto *titleShadow = new QGraphicsDropShadowEffect(this);
     titleShadow->setBlurRadius(25);
     titleShadow->setOffset(0, 0);
     titleShadow->setColor(QColor(255, 255, 255, 100));
-    title->setGraphicsEffect(titleShadow);
+    titleLabel->setGraphicsEffect(titleShadow);
 
-    // 呼吸效果：阴影透明度 100~140 波动
+    // 呼吸动画定时器
     QTimer *breatheTimer = new QTimer(this);
-    breatheTimer->setInterval(60);
+    breatheTimer->setInterval(40);
     float breathePhase = 0;
     connect(breatheTimer, &QTimer::timeout, this, [=]() mutable {
         breathePhase += 0.05f;
-        int alpha = 100 + 40 * qSin(breathePhase);
+        int alpha = 60 + 120 * qSin(breathePhase);
         titleShadow->setColor(QColor(255, 255, 255, alpha));
+        titleShadow->setBlurRadius(30);              // 加模糊
     });
-    breatheTimer->start();
 
+    breatheTimer->start();
     // 副标题
-    QLabel *subtitle = new QLabel("AI 驱动 · 68点面部分析", this);
+    QLabel *subtitle = new QLabel(" 68点面部分析", this);
     subtitle->setAlignment(Qt::AlignCenter);
     subtitle->setGeometry(0, 85, 500, 30);
     subtitle->setStyleSheet("color: #aaccff; font-size: 14px; background: transparent; letter-spacing: 2px;");
 
-    // ========== 4. 胶囊按钮（悬停时放大）==========
+    // 胶囊按钮
     QString btnStyle = R"(
         QPushButton {
             background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
@@ -143,7 +167,7 @@ StartWindow::StartWindow(QWidget *parent)
     shadow2->setColor(QColor(255, 42, 109, 120));
     btnVideo->setGraphicsEffect(shadow2);
 
-    // ---- 悬停放大动画（事件过滤器实现）----
+    //悬停放大动画
     class HoverEnlarge : public QObject {
     public:
         HoverEnlarge(QPushButton *btn, QObject *parent) : QObject(parent), m_btn(btn) {
@@ -178,7 +202,7 @@ StartWindow::StartWindow(QWidget *parent)
     new HoverEnlarge(btnPhoto, this);
     new HoverEnlarge(btnVideo, this);
 
-    // ========== 5. 装饰分隔线 ==========
+    //  装饰分隔线
     auto addLine = [this](int y) {
         QLabel *line = new QLabel(this);
         line->setGeometry(50, y, 400, 3);
@@ -187,21 +211,20 @@ StartWindow::StartWindow(QWidget *parent)
                             "border: none;");
         line->setAttribute(Qt::WA_TransparentForMouseEvents);
     };
-    // addLine(140);
     addLine(280);
 
-    // 底部版本号
+    // 底部提示
     QLabel *version = ui->label_2;
-    version->setText("娱乐评价，经供参考");
+    version->setText("娱乐评价，仅供参考");
     version->setAlignment(Qt::AlignCenter);
     version->setGeometry(0, 300, 500, 25);
     version->setStyleSheet("color: #7a8aa0; font-size: 13px; background: transparent;");
 
-    // ========== 原有初始化 ==========
+    // 初始化
     photoTest = nullptr;
     videoTest = nullptr;
 }
-// 析构函数 —— 必须保留！
+// 析构函数
 StartWindow::~StartWindow()
 {
     delete ui;
@@ -209,7 +232,7 @@ StartWindow::~StartWindow()
     if (videoTest) delete videoTest;
 }
 
-// 槽函数 —— 必须保留！
+// 槽函数
 void StartWindow::on_photoTestBtn_clicked()
 {
     if (!photoTest) {

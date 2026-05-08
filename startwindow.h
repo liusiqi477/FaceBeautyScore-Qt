@@ -3,8 +3,11 @@
 
 #include <QMainWindow>
 #include "videotest.h"
+#include <QPainter>
+#include <QRadialGradient>
+#include <QtMath>         // for qSin, qCos, M_PI
 
-// 【关键】前向声明 PhotoTest，避免循环依赖
+// 前向声明 PhotoTest，避免循环依赖
 class PhotoTest;
 
 QT_BEGIN_NAMESPACE
@@ -28,7 +31,7 @@ private slots:
 
 private:
     Ui::StartWindow *ui;
-    PhotoTest *photoTest;  // 只声明，不实例化
+    PhotoTest *photoTest;
     VideoTest *videoTest;
 };
 

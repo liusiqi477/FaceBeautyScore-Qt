@@ -3,6 +3,8 @@
 
 #include <opencv2/opencv.hpp>
 #include <vector>
+#include <opencv2/imgproc.hpp>
+
 
 class BeautyScorer
 {
@@ -34,6 +36,10 @@ private:
     double calcSkin(const cv::Mat& face,const std::vector<cv::Point>& landmarks68);
     // 五官比例
     double calcFeatureProportions(const std::vector<cv::Point>& lm);
+
+
+
+
 
 private:
     double m_sanTing;

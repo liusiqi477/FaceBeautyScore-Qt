@@ -24,11 +24,6 @@ PhotoTest::PhotoTest(StartWindow *startWindow, QWidget *parent)
     // 搭建全部 UI（照片框、按钮、评分面板）
     setupUI();
 
-    // 添加动态光斑
-    addGlowEffects();
-
-    // 初始化检测器和评分器
-    //（假设 detector、m_beauty、m_analyzer 已在头文件中声明）
 }
 
 void PhotoTest::applyGlobalStyle()
@@ -52,7 +47,7 @@ void PhotoTest::setupUI()
     mainLayout->setContentsMargins(30, 30, 30, 30);
     mainLayout->setSpacing(30);
 
-    // ========== 左侧：照片框 + 按钮 ==========
+    // 左侧：照片框 + 按钮
     QVBoxLayout *leftLayout = new QVBoxLayout;
     leftLayout->setSpacing(20);
 
@@ -63,11 +58,11 @@ void PhotoTest::setupUI()
     photoFrame->setText("📷 点击下方按钮选择照片");
     photoFrame->setCursor(Qt::PointingHandCursor);
 
-    // ---------- 高级粗边框样式 ----------
+    // 高级粗边框样式
     photoFrame->setStyleSheet(R"(
     QLabel {
-        background: rgba(18, 22, 35, 0.88);        /* 深蓝黑玻璃底 */
-        border: 3px solid #7a8b9f;                 /* 高级灰蓝粗边框 */
+        background: rgba(18, 22, 35, 0.88);
+        border: 3px solid #7a8b9f;
         border-radius: 28px;
         color:  #aaccff;
         font-size: 20px;
@@ -76,17 +71,17 @@ void PhotoTest::setupUI()
         padding: 18px;
     }
     QLabel:hover {
-        border-color: #b9a68c;                     /* 鼠标悬停暖金边 */
+        border-color: #b9a68c;
         background: rgba(25, 30, 45, 0.93);
         color: #ffffff;
     }
 )");
 
-    // ---------- 精致的静态阴影（无动画） ----------
+    // 精致的静态阴影
     auto *frameShadow = new QGraphicsDropShadowEffect(photoFrame);
     frameShadow->setBlurRadius(28);
     frameShadow->setOffset(0, 8);
-    frameShadow->setColor(QColor(0, 0, 0, 140));       /* 深色投影增加立体感 */
+    frameShadow->setColor(QColor(0, 0, 0, 140));
     photoFrame->setGraphicsEffect(frameShadow);
 
     leftLayout->addWidget(photoFrame, 0, Qt::AlignCenter);
@@ -134,7 +129,7 @@ void PhotoTest::setupUI()
     btnSelect = new QPushButton("📷 选择图片");
     btnSelect->setStyleSheet(neonBtnStyle);
     btnSelect->setCursor(Qt::PointingHandCursor);
-    btnSelect->setFixedSize(100, 50);
+    btnSelect->setFixedSize(180, 50);
     auto *s1 = new QGraphicsDropShadowEffect(this);
     s1->setBlurRadius(20);
     s1->setOffset(0, 4);
@@ -144,7 +139,7 @@ void PhotoTest::setupUI()
     btnDetect = new QPushButton("🔍 开始检测");
     btnDetect->setStyleSheet(neonBtnStyle);
     btnDetect->setCursor(Qt::PointingHandCursor);
-    btnDetect->setFixedSize(100, 50);
+    btnDetect->setFixedSize(180, 50);
     btnDetect->setEnabled(false);
     auto *s2 = new QGraphicsDropShadowEffect(this);
     s2->setBlurRadius(20);
@@ -158,18 +153,18 @@ void PhotoTest::setupUI()
 
     mainLayout->addLayout(leftLayout);
 
-    // ========== 右侧：评分面板 + 返回按钮 ==========
+    // 右侧：评分面板 + 返回按钮
     QVBoxLayout *rightLayout = new QVBoxLayout;
     rightLayout->setSpacing(20);
 
-    // 分数面板（自定义的 ScoreDisplay 卡片）
+    // 分数面板
     scorePanel = new ScoreDisplay;
-    scorePanel->setFixedWidth(340);  // 宽度配合卡片样式
+    scorePanel->setFixedWidth(340);
     rightLayout->addWidget(scorePanel);
 
     rightLayout->addStretch();
 
-    // 返回按钮（透明边框风格）
+    // 返回按钮
     btnBack = new QPushButton("↩ 返回主页");
     btnBack->setStyleSheet(R"(
         QPushButton {
@@ -198,42 +193,11 @@ void PhotoTest::setupUI()
 
 
 }
-// 动态光斑：四个半透明圆点在背景中缓慢飘移
-void PhotoTest::addGlowEffects()
-{
-    auto createGlow = [&](int x, int y, QString color) {
-        QLabel *glow = new QLabel(this);
-        glow->setFixedSize(200, 200);
-        glow->setStyleSheet(QString("background: radialgradient(cx:0.5, cy:0.5, radius:0.5, "
-                                    "stop:0 %1, stop:1 transparent); border: none;").arg(color));
-        glow->setAttribute(Qt::WA_TransparentForMouseEvents);
-        glow->move(x, y);
-        glow->lower();  // 放在最底层
-        return glow;
-    };
 
-    QLabel *g1 = createGlow(60, 50,  "rgba(160,120,255,25%)");
-    QLabel *g2 = createGlow(700, 100, "rgba(255,100,160,20%)");
-    QLabel *g3 = createGlow(200, 450, "rgba(80,180,255,18%)");
-    QLabel *g4 = createGlow(650, 480, "rgba(255,180,80,15%)");
-
-    glowTimer = new QTimer(this);
-    glowTimer->setInterval(50);
-    float t = 0;
-    connect(glowTimer, &QTimer::timeout, this, [=]() mutable {
-        t += 0.02f;
-        if (t > 2 * M_PI) t -= 2 * M_PI;
-        g1->move(60  + 20 * qSin(t * 1.3f),  50  + 15 * qCos(t * 1.7f));
-        g2->move(700 + 25 * qSin(t * 0.8f + 1), 100 + 20 * qCos(t * 1.2f + 2));
-        g3->move(200 + 18 * qSin(t * 1.1f + 3), 450 + 22 * qCos(t * 0.9f + 1));
-        g4->move(650 + 22 * qSin(t * 0.6f + 2), 480 + 18 * qCos(t * 1.5f + 0.5f));
-    });
-    glowTimer->start();
-}
 void PhotoTest::animatePhotoAppear()
 {
     auto *fadeEffect = new QGraphicsOpacityEffect(this);
-    photoFrame->setGraphicsEffect(fadeEffect);  // 暂时替换阴影（动画结束后换回）
+    photoFrame->setGraphicsEffect(fadeEffect);  // 暂时替换阴影
     fadeEffect->setOpacity(0.0);
 
     auto *anim = new QPropertyAnimation(fadeEffect, "opacity", this);
@@ -242,9 +206,8 @@ void PhotoTest::animatePhotoAppear()
     anim->setEndValue(1.0);
     anim->start(QAbstractAnimation::DeleteWhenStopped);
 
-    // 动画结束后重新加上阴影（连接信号）
+    // 动画结束后重新加上阴影
     connect(anim, &QPropertyAnimation::finished, this, [this]() {
-        // 重新设置一个阴影效果（如果之前被你替换了的话）
         QGraphicsDropShadowEffect *s = new QGraphicsDropShadowEffect(this);
         s->setBlurRadius(30);
         s->setOffset(0, 6);
@@ -252,7 +215,7 @@ void PhotoTest::animatePhotoAppear()
         photoFrame->setGraphicsEffect(s);
     });
 }
-// ====== 业务槽函数 ======
+// 槽函数
 void PhotoTest::on_selectBtn_clicked()
 {
     QString path = QFileDialog::getOpenFileName(this, "选择图片", "",
@@ -278,27 +241,54 @@ void PhotoTest::doDetectionAndScoring()
 {
     if (currentImagePath.isEmpty()) return;
 
-    QImage result = detector.detect68Points(currentImagePath);
-    if (result.isNull()) {
-        QMessageBox::warning(this, "提示", "未检测到人脸！");
+    // 读取图片 (BGR)
+    cv::Mat bgrImage = cv::imread(currentImagePath.toLocal8Bit().toStdString());
+    if (bgrImage.empty()) {
+        QMessageBox::warning(this, "错误", "无法读取图片！");
+        return;
+    }
+
+    // 检测 + 对齐
+    if (!detector.detect(bgrImage)) {
+        QMessageBox::warning(this, "提示", "未检测到合适的人脸！");
         scorePanel->clear();
         return;
     }
 
-    // 显示带68点的原图
-    photoFrame->setPixmap(QPixmap::fromImage(result).scaled(photoFrame->size(), Qt::KeepAspectRatio));
+    //  创建带关键点的显示图像
+    // 获取关键点（原始坐标）
+    auto rawPoints = detector.getLandmarks();
 
+    // 在原图上画点，半径按图像宽度动态计算（例如占宽度的 0.4%）
+    int imgWidth = bgrImage.cols;
+    int radius = std::max(2, cvRound(imgWidth * 0.004));  // 至少2像素，防止小图看不见
+
+    cv::Mat displayImage = bgrImage.clone();
+    FaceDetector::drawLandmarks(displayImage, rawPoints, cv::Scalar(0, 255, 0), radius);
+
+    // 转为 QImage 并显示在 photoFrame 上
+    cv::cvtColor(displayImage, displayImage, cv::COLOR_BGR2RGB);
+    QImage qimg(displayImage.data, displayImage.cols, displayImage.rows,
+                displayImage.step, QImage::Format_RGB888);
+    photoFrame->setPixmap(QPixmap::fromImage(qimg).scaled(photoFrame->size(),
+                                                          Qt::KeepAspectRatio,
+                                                          Qt::SmoothTransformation));
+
+    // 多脸提示
     if (detector.getFaceCount() > 1) {
         QMessageBox::information(this, "提示", "检测到多张人脸，已自动选取最大人脸评分");
     }
 
+    // 获取对齐后的关键点与正脸，用于评分
     auto alignedPts = detector.getAlignedLandmarks();
     auto alignedFace = detector.getAlignedFace();
+    // 理论上 detect() 成功这里数据一定有效，但仍做一次保护
     if (alignedPts.size() < 68 || alignedFace.empty()) {
         QMessageBox::warning(this, "错误", "人脸数据异常，无法评分");
         return;
     }
 
+    // 计算总分
     double total = m_beauty.calculateTotalScore(alignedPts, alignedFace);
     scorePanel->updateScore(
         m_beauty.sanTingScore(),
@@ -309,6 +299,7 @@ void PhotoTest::doDetectionAndScoring()
         total
         );
 
+    //五官分析
     FacialFeatures feat = m_analyzer.analyze(alignedPts);
     scorePanel->setFacialFeatures(feat);
 }

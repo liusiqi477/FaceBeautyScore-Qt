@@ -20,7 +20,7 @@ ScoreDisplay::ScoreDisplay(QWidget *parent) : QWidget(parent)
     mainLayout->setSpacing(12);
     mainLayout->setContentsMargins(20, 25, 20, 20);
 
-    // ========== 总分区域 ==========
+    // 总分区域
     lab_total = new QLabel("--");
     lab_total->setAlignment(Qt::AlignCenter);
     lab_total->setStyleSheet(R"(
@@ -49,7 +49,7 @@ ScoreDisplay::ScoreDisplay(QWidget *parent) : QWidget(parent)
     mainLayout->addWidget(lab_comment);
     mainLayout->addSpacing(10);
 
-    // ========== 维度项 ==========
+    //  维度项
     auto createItem = [&](const QString &icon, const QString &name,
                           QLabel *&label, QProgressBar *&bar) {
         auto *hLayout = new QHBoxLayout;
@@ -77,7 +77,7 @@ ScoreDisplay::ScoreDisplay(QWidget *parent) : QWidget(parent)
         mainLayout->addLayout(hLayout);
     };
 
-    createItem("🔺", "三庭", lab_san, bar_san);
+    createItem("🔺", "庭衡", lab_san, bar_san);
     createItem("👁️", "五眼", lab_wu, bar_wu);
     createItem("🔄", "对称", lab_sym, bar_sym);
     createItem("✨", "皮肤", lab_skin, bar_skin);
@@ -112,7 +112,7 @@ void ScoreDisplay::setItemLocked(int index, bool locked)
     QLabel* lab = nullptr;
     QString icon, name;
     switch (index) {
-    case 0: lab = lab_san; icon = "🔺"; name = "三庭"; break;
+    case 0: lab = lab_san; icon = "🔺"; name = "庭衡"; break;
     case 1: lab = lab_wu;  icon = "👁️"; name = "五眼"; break;
     case 2: lab = lab_sym; icon = "🔄"; name = "对称"; break;
     case 3: lab = lab_skin;icon = "✨"; name = "皮肤"; break;
@@ -260,19 +260,10 @@ void ScoreDisplay::updateScore(double sanTing, double wuYan, double symmetry,
         lab_comment->setStyleSheet(QString("font-size:16px; font-weight:bold; color:%1; padding:4px;").arg(commentColor));
     }
 
-
-    // auto updateLabel = [](QLabel *lab, const QString &icon, const QString &name, double val) {
-    //     lab->setText(QString("%1 %2  %3/20").arg(icon, name, QString::number(val, 'f', 1)));
-    // };
-    // updateLabel(lab_san, "🔺", "三庭", sanTing);
-    // updateLabel(lab_wu, "👁️", "五眼", wuYan);
-    // updateLabel(lab_sym, "🔄", "对称", symmetry);
-    // updateLabel(lab_skin, "✨", "皮肤", skin);
-    // updateLabel(lab_feat, "🎭", "协调", feature);
     // 分项数据数组
     QLabel* labs[5] = {lab_san, lab_wu, lab_sym, lab_skin, lab_feat};
     QString icons[5] = {"🔺", "👁️", "🔄", "✨", "🎭"};
-    QString names[5] = {"三庭", "五眼", "对称", "皮肤", "协调"};
+    QString names[5] = {"庭衡", "五眼", "对称", "皮肤", "协调"};
     double values[5] = {sanTing, wuYan, symmetry, skin, feature};
     QProgressBar* bars[5] = {bar_san, bar_wu, bar_sym, bar_skin, bar_feat};
 
@@ -339,7 +330,7 @@ void ScoreDisplay::clear()
     lab_comment->setText("评语：--");
     lab_comment->setStyleSheet("font-size:16px; font-weight:bold; color:#aaaaaa; padding:4px;");
 
-    lab_san->setText("🔺 三庭  0/20");
+    lab_san->setText("🔺 庭衡  0/20");
     lab_wu->setText("👁️ 五眼  0/20");
     lab_sym->setText("🔄 对称  0/20");
     lab_skin->setText("✨ 皮肤  0/20");

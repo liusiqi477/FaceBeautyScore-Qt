@@ -9,7 +9,7 @@
 #include "beautyscorer.h"
 #include "scoredisplay.h"
 #include "facialfeatureanalyzer.h"
-// 【关键】前向声明 StartWindow，避免循环依赖
+//前向声明 StartWindow，避免循环依赖
 class StartWindow;
 
 QT_BEGIN_NAMESPACE
@@ -35,9 +35,8 @@ private slots:
     void on_detectBtn_clicked();
 
 private:
-    void setupUI();                    // 完全用代码搭建界面
+    void setupUI();
      void applyGlobalStyle();
-    void addGlowEffects();             // 动态光斑
     void doDetectionAndScoring();
     void animatePhotoAppear();
     // UI 控件指针

@@ -31,20 +31,18 @@ private slots:
 private:
     void setupUI();
     void applyGlobalStyle();
-    void addGlowEffects();
+    // void addGlowEffects();
 
-    // 新控件（替代 .ui 中的控件）
+    // 新控件
     QLabel *videoFrame;      // 原 ui->label
     QPushButton *btnCamera;  // 原 ui->openCameraBtn
     QPushButton *btnBack;    // 原 ui->backBtn
     QLabel *hintLabel;       // 原 ui->hintLabel
-    QTimer *glowTimer;       // 光斑定时器
+
 private:
     void resetEvaluation();
     void stopCamera();
     QString generateHint();       // 根据锁定分数生成提示语
-    void lockItem(double &lockedVal, bool &lockFlag, int &stableCount,
-                  double &lastCandidate, double currentVal, double threshold);
 
     Ui::VideoTest *ui;
 
@@ -55,11 +53,11 @@ private:
     ScoreDisplay* scoreDisplay;
     FacialFeatureAnalyzer featureAnalyzer;
 
-    // ---- 状态 ----
+    //  状态
     enum class EvalState { Evaluating, Locked };
     EvalState evalState = EvalState::Evaluating;
 
-    // ---- 单项锁定标志 & 稳定计数 ----
+    // 单项锁定标志 & 稳定计数
     bool lockSanTing    = false;
     bool lockWuYan      = false;
     bool lockSymmetry   = false;
@@ -94,7 +92,7 @@ private:
 
     static constexpr double alpha = 0.2;            // 平滑系数
     static constexpr int requiredStableFrames = 40; // 单项稳定帧数
-    static constexpr double itemThreshold = 1.0;    // 单项波动阈值（分）
+    static constexpr double itemThreshold = 1.5;    // 单项波动阈值（分）
 };
 
 #endif // VIDEOTEST_H
